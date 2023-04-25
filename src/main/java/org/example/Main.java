@@ -60,8 +60,9 @@ public class Main {
         ArrayList<Player> players = new ArrayList<>();
         ArrayList<Player> playersBacklog = new ArrayList<>();
         for(int i=0; i<20; i++) {
-            players.add(new Player());
-            playersBacklog.add(new Player());
+            Player temp = new Player();
+            players.add(temp);
+            playersBacklog.add(temp);
         }
 
 
@@ -121,13 +122,14 @@ public class Main {
         //TODO this assumes that "Start" is the beginning node.
         // does this cover all variables?
         player.setPath(path);
-        movePlayerToNextEdge(player, playersToRemove, t);
+        handleVariablesForMovement(player, player.getEdge());
     }
 
     public static void movePlayerToNextEdge(Player player, ArrayList<Player> playersToRemove, int t) {
         player.removeOldEdge();
         if(player.reachedEnd()) {
             handlePlayerReachingEnd(player, playersToRemove, t);
+            return;
         }
 
         System.out.println(player.getPath());
@@ -149,6 +151,7 @@ public class Main {
         } else {
             //TODO check if this is working properly or is defaulting to null sizes
             nextEdge.getQueue().add(player); //if no space is available, the player waits in a queue
+            player.setRemainingTimeForEdge(-1);
         }
 
         player.setPosition(nextEdge);

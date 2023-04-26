@@ -1,60 +1,29 @@
 package org.example;
 
 import org.jgrapht.Graph;
-import org.jgrapht.alg.flow.EdmondsKarpMFImpl;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+/**
+ * Change flow definition
+ * number of players entering must be at least max flow
+ * update aggregate weights
+ * visualize
+ * clean up the code
+ *      Maybe handlePlayerMovement function can be the move edge function
+ * file input to generate graph
+ * have some pointers and comments to explain structure
+ */
+
+
 
 public class Main {
     public static void main(String[] args) {
-        Graph<String, FlowEdge> g = new SimpleDirectedWeightedGraph<>(FlowEdge.class);
-
-        //create vertices and assign them
+        Graph<String, FlowEdge> g = new CustomGraph().getGraph();
         String Start = "Start";
-        String A = "A";
-        String B = "B";
-        String C = "C";
         String End = "End";
-        g.addVertex(Start);
-        g.addVertex(A);
-        g.addVertex(B);
-        g.addVertex(C);
-        g.addVertex(End);
-
-        //create edges
-        FlowEdge E_Start_A = g.addEdge(Start, A);
-        g.setEdgeWeight(E_Start_A, 3);
-        E_Start_A.setActualWeight(3);
-        E_Start_A.setCapacity(7);
-
-        FlowEdge E_Start_C = g.addEdge(Start, C);
-        g.setEdgeWeight(E_Start_C, 2);
-        E_Start_C.setActualWeight(2);
-        E_Start_C.setCapacity(10);
-
-        FlowEdge E_A_B = g.addEdge(A, B);
-        g.setEdgeWeight(E_A_B, 2);
-        E_A_B.setActualWeight(2);
-        E_A_B.setCapacity(7);
-
-        FlowEdge E_B_End = g.addEdge(B, End);
-        g.setEdgeWeight(E_B_End, 1);
-        E_B_End.setActualWeight(1);
-        E_B_End.setCapacity(5);
-
-        FlowEdge E_C_B = g.addEdge(C, B);
-        g.setEdgeWeight(E_C_B, 2);
-        E_C_B.setActualWeight(2);
-        E_C_B.setCapacity(3);
-
-        FlowEdge E_C_End = g.addEdge(C, End);
-        g.setEdgeWeight(E_C_End, 5);
-        E_C_End.setActualWeight(5);
-        E_C_End.setCapacity(10);
 
         //create players
         ArrayList<Player> players = new ArrayList<>();
@@ -66,22 +35,19 @@ public class Main {
         }
 
 
-
-        //TODO don't I need to have strategy update after each player??
-        //TODO new flow definition from Arya
         ArrayList<Player> playersInGame = new ArrayList<>();
         ArrayList<Player> playersToRemove = new ArrayList<>(); // I cannot modify collection while looping through it, so this is a workaround
+        ArrayList<Player> playerDone = new ArrayList<>();
         for(int t = 0; t < 100; t++) {
             //shortest path remains constant in this single epoch
             DijkstraShortestPath<String, FlowEdge> dijkstra = new DijkstraShortestPath<>(g);
             List<FlowEdge> shortestPathList = dijkstra.getPath(Start, End).getEdgeList();
             ArrayList<FlowEdge> shortestPath = new ArrayList<>(shortestPathList);
             // double shortestPathWeight = dijkstra.getPathWeight(Start, End);
-//             System.out.println(shortestPath);
+            // System.out.println(shortestPath);
             // System.out.println("Shortest path weight: " + shortestPathWeight);
 
-            //create players and add them
-            //TODO number of players entering must be at least max flow
+            //creates players and add them
             for(Player player : playersBacklog) {
                 double rand = Math.random();
                 if(rand < 0.3) {
@@ -92,68 +58,80 @@ public class Main {
             playersBacklog.removeAll(playersToRemove);
             playersToRemove.clear();
 
-            //move players
+
             for(Player player : playersInGame) {
-                player.iterateTime();
-                if(player.getRemainingTimeForEdge() == 0) {
-                    movePlayerToNextEdge(player, playersToRemove, t);
-                }
+                movePlayer(player, playersToRemove, t);
             }
            playersInGame.removeAll(playersToRemove);
+           playerDone.addAll(playersToRemove);
            playersToRemove.clear();
 
             //TODO Update Aggregate Weights
             for(FlowEdge edge : g.edgeSet()) {
+                edge.setRemainingCapacity(edge.getCapacity());
                 double newWeight = edge.calculateAggregateWeight();
                 g.setEdgeWeight(edge, newWeight);
             }
         }
 
+        System.out.println(playerDone);
+        System.out.println(playerDone.size());
 
-//        EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(g);
-//        double maxFlow = ek.calculateMaximumFlow(Start, End);
-//        System.out.println(maxFlow);
+        // EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(g);
+        // double maxFlow = ek.calculateMaximumFlow(Start, End);
+        // System.out.println(maxFlow);
     }
 
     public static void addPlayerToGame(Player player, ArrayList<Player> playersToRemove, ArrayList<FlowEdge> path, int t) {
         player.setTimeStarted(t);
         playersToRemove.add(player);
 
-        //TODO this assumes that "Start" is the beginning node.
-        // does this cover all variables?
         player.setPath(path);
         handleVariablesForMovement(player, player.getEdge());
     }
 
+    public static void movePlayer(Player player, ArrayList<Player> playersToRemove, int t) {
+        if(player.isInsideEdge()) {
+            player.moveForward();
+            if(player.finishedEdge()) {
+                movePlayerToNextEdge(player, playersToRemove, t);
+            }
+        } else {
+            handleVariablesForMovement(player, player.getEdge());
+        }
+
+    }
+
     public static void movePlayerToNextEdge(Player player, ArrayList<Player> playersToRemove, int t) {
-        player.removeOldEdge();
-        if(player.reachedEnd()) {
+        FlowEdge oldEdge = player.removeOldEdge();
+        oldEdge.getPlayersInEdge().remove(player);
+
+        if(player.reachedEndOfGraph()) {
             handlePlayerReachingEnd(player, playersToRemove, t);
             return;
         }
 
-        System.out.println(player.getPath());
         FlowEdge nextEdge = player.getEdge();
         handleVariablesForMovement(player, nextEdge);
     }
 
-    //TODO Anything else?
     public static void handlePlayerReachingEnd(Player player, ArrayList<Player> playersToRemove, int t) {
         playersToRemove.add(player);
         player.calculateTimeTotal(t);
     }
 
     public static void handleVariablesForMovement(Player player, FlowEdge nextEdge) {
+        player.setPosition(nextEdge);
+
         //checks if there's any room available for the player to join the edge
-        if (nextEdge.isOpen()) {
+        if (nextEdge.isOpen() && player.canLeaveQueue()) {
             nextEdge.getPlayersInEdge().add(player);
+            nextEdge.getQueue().remove(player);
+            nextEdge.decrementCapacity();
             player.setRemainingTimeForEdge(nextEdge.getActualWeight());
-        } else {
-            //TODO check if this is working properly or is defaulting to null sizes
+        } else if(!player.isInQueue()) {
             nextEdge.getQueue().add(player); //if no space is available, the player waits in a queue
             player.setRemainingTimeForEdge(-1);
         }
-
-        player.setPosition(nextEdge);
     }
 }

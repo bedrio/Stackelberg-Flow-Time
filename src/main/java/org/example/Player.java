@@ -22,15 +22,37 @@ public class Player {
         return path.get(0);
     }
 
-    public void iterateTime() {
+    public boolean isInQueue() {
+        return this.position.getQueue().contains(this);
+    }
+
+    public boolean canLeaveQueue() {
+        int queueIndex = this.position.getQueue().indexOf(this);
+        if(queueIndex == -1) {
+            return true; //situation where there is no queue
+        }
+
+        double remainingCapacity = this.position.getRemainingCapacity();
+        return (queueIndex + 1) <= remainingCapacity; // +1 to account for arrays starting at index 0
+    }
+
+    public boolean isInsideEdge() {
+        return this.position.getPlayersInEdge().contains(this);
+    }
+
+    public void moveForward() {
         this.remainingTimeForEdge = this.remainingTimeForEdge - 1;
     }
 
-    public void removeOldEdge() {
-        this.path.remove(0);
+    public boolean finishedEdge() {
+        return this.remainingTimeForEdge == 0;
     }
 
-    public boolean reachedEnd() {
+    public FlowEdge removeOldEdge() {
+        return this.path.remove(0);
+    }
+
+    public boolean reachedEndOfGraph() {
         return this.path.isEmpty();
     }
 

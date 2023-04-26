@@ -14,6 +14,7 @@ import java.util.ArrayList;
  */
 public class FlowEdge extends DefaultWeightedEdge {
     double capacity = 0;
+    double remainingCapacity = 0;
     double actualWeight = 0;
     ArrayList<Player> playersInEdge = new ArrayList<>();
     ArrayList<Player> queue = new ArrayList<>();
@@ -22,13 +23,17 @@ public class FlowEdge extends DefaultWeightedEdge {
     }
 
     public boolean isOpen() {
-        return this.playersInEdge.size() < this.capacity;
+        return remainingCapacity > 0;
+    }
+
+    public void decrementCapacity() {
+        this.remainingCapacity = this.remainingCapacity - 1;
     }
 
     //TODO Maybe implement dynamic calculation?
     // So far, this calculates the maximum delay possible
     public double calculateAggregateWeight() {
-        return ( (queue.size() / this.capacity) * this.actualWeight ) + this.actualWeight;
+        return this.queue.size() + this.actualWeight;
     }
 
     public double getWeightSetInGraph() {
@@ -40,6 +45,13 @@ public class FlowEdge extends DefaultWeightedEdge {
     }
     public void setCapacity(double capacity) {
         this.capacity = capacity;
+    }
+
+    public double getRemainingCapacity() {
+        return remainingCapacity;
+    }
+    public void setRemainingCapacity(double remainingCapacity) {
+        this.remainingCapacity = remainingCapacity;
     }
 
     public double getActualWeight() {

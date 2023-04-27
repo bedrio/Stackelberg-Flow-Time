@@ -1,10 +1,12 @@
 package org.example;
 
 import org.jgrapht.Graph;
+import org.jgrapht.alg.flow.EdmondsKarpMFImpl;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Change flow definition
@@ -18,12 +20,15 @@ import java.util.List;
  */
 
 
-
 public class Main {
-    public static void main(String[] args) {
-        Graph<String, FlowEdge> g = new CustomGraph().getGraph();
+    public static void main(String[] args) throws InterruptedException {
+        CustomGraph frame = new CustomGraph();
+        frame.visualize();
+
+        Graph<String, FlowEdge> graph = frame.getGraph();
         String Start = "Start";
         String End = "End";
+
 
         //create players
         ArrayList<Player> players = new ArrayList<>();
@@ -37,10 +42,10 @@ public class Main {
 
         ArrayList<Player> playersInGame = new ArrayList<>();
         ArrayList<Player> playersToRemove = new ArrayList<>(); // I cannot modify collection while looping through it, so this is a workaround
-        ArrayList<Player> playerDone = new ArrayList<>();
+        ArrayList<Player> playersDone = new ArrayList<>();
         for(int t = 0; t < 100; t++) {
             //shortest path remains constant in this single epoch
-            DijkstraShortestPath<String, FlowEdge> dijkstra = new DijkstraShortestPath<>(g);
+            DijkstraShortestPath<String, FlowEdge> dijkstra = new DijkstraShortestPath<>(graph);
             List<FlowEdge> shortestPathList = dijkstra.getPath(Start, End).getEdgeList();
             ArrayList<FlowEdge> shortestPath = new ArrayList<>(shortestPathList);
             // double shortestPathWeight = dijkstra.getPathWeight(Start, End);
@@ -63,23 +68,27 @@ public class Main {
                 movePlayer(player, playersToRemove, t);
             }
            playersInGame.removeAll(playersToRemove);
-           playerDone.addAll(playersToRemove);
+           playersDone.addAll(playersToRemove);
            playersToRemove.clear();
 
-            //TODO Update Aggregate Weights
-            for(FlowEdge edge : g.edgeSet()) {
+            for(FlowEdge edge : graph.edgeSet()) {
                 edge.setRemainingCapacity(edge.getCapacity());
                 double newWeight = edge.calculateAggregateWeight();
-                g.setEdgeWeight(edge, newWeight);
+                graph.setEdgeWeight(edge, newWeight);
+            }
+
+            //if all players reached the end, then stop simulation
+            if(playersDone.size() == players.size()) {
+                break;
             }
         }
 
-        System.out.println(playerDone);
-        System.out.println(playerDone.size());
+        System.out.println(playersDone);
+        System.out.println(playersDone.size());
 
-        // EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(g);
-        // double maxFlow = ek.calculateMaximumFlow(Start, End);
-        // System.out.println(maxFlow);
+        EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(graph);
+        double maxFlow = ek.calculateMaximumFlow(Start, End);
+        System.out.println(maxFlow);
     }
 
     public static void addPlayerToGame(Player player, ArrayList<Player> playersToRemove, ArrayList<FlowEdge> path, int t) {

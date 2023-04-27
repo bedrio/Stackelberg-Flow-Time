@@ -1,9 +1,20 @@
 package org.example;
 
+import com.mxgraph.layout.*;
+import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxConstants;
+import com.mxgraph.view.mxEdgeStyle;
+import com.mxgraph.view.mxPerimeter;
 import org.jgrapht.Graph;
+import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
-public class CustomGraph {
+import javax.swing.*;
+import java.awt.*;
+
+public class CustomGraph extends JFrame {
+    private static final long serialVersionUID = 1L;
+
     Graph<String, FlowEdge> graph;
 
     public CustomGraph() {
@@ -55,5 +66,25 @@ public class CustomGraph {
 
     public Graph<String, FlowEdge> getGraph() {
         return graph;
+    }
+
+    public void visualize() {
+        JGraphXAdapter<String, FlowEdge> jgxAdapter = new JGraphXAdapter<>(graph);
+        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
+        jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_SHAPE, "1");
+        jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_FONTSIZE, "13");
+
+        mxGraphComponent graphComponent = new mxGraphComponent(jgxAdapter);
+        mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);
+        layout.execute(jgxAdapter.getDefaultParent());
+        add(graphComponent);
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+
+//        mxCircleLayout layout = new mxCircleLayout(jgxAdapter);
+//        mxFastOrganicLayout layout = new mxFastOrganicLayout(jgxAdapter);
     }
 }

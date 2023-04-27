@@ -4,19 +4,23 @@ import org.jgrapht.Graph;
 import org.jgrapht.alg.flow.EdmondsKarpMFImpl;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * number of players entering must be at least max flow
  * clean up the code
- *      Maybe handlePlayerMovement function can be the move edge function
  * file input to generate graph
  * have some pointers and comments to explain structure
- *
+ * <p>
  * run simulation many times and get PoA average
  * true / false for debug mode?
+ * tell Arya that I made a capacity graph for max flow
+ *
+ *
+ * Rewrite CSV reader to make it my own
+ * I used ChatGPT, should that be mentioned?
  */
 
 
@@ -24,12 +28,11 @@ public class Main {
     // Utility Variable. I cannot modify collection while looping through it, so this is a workaround
     private static ArrayList<Player> playersToRemove = new ArrayList<>();
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         CustomGraph frame = new CustomGraph();
-        //TODO frame.createGraphFromFile
+        Graph<String, FlowEdge> graph = frame.createGraphFromFiles("Vertices.csv", "Edges.csv");
         frame.visualize();
-        Graph<String, FlowEdge> graph = frame.getGraph(); //graph data structure of simulation
-        double maxFlow = getMaxFlow(graph);
+        double maxFlow = getMaxFlow(frame);
 
         //create players and relevant variables
         int numberOfPlayers = 100;
@@ -87,6 +90,9 @@ public class Main {
 
     private static void addPlayers(ArrayList<Player> playersBacklog, ArrayList<Player> playersInGame, ArrayList<FlowEdge> shortestPath, double maxFlow, int t) {
         for(int i=0; i<maxFlow; i++) {
+            if(i >= playersBacklog.size()) {
+                break;
+            }
             Player player = playersBacklog.get(i);
             addSinglePlayer(player, playersInGame, (ArrayList<FlowEdge>) shortestPath.clone(), t);
         }
@@ -178,8 +184,10 @@ public class Main {
         }
     }
 
-    private static double getMaxFlow(Graph<String, FlowEdge> graph) {
-        EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(graph);
+    private static double getMaxFlow(CustomGraph frame) {
+        Graph<String, FlowEdge> capacityGraph = frame.getCapacityGraph();
+
+        EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(capacityGraph);
         return ek.calculateMaximumFlow("Start", "End");
     }
 }

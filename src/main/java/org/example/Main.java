@@ -9,89 +9,104 @@ import java.util.List;
 
 
 /**
- * Change flow definition
  * number of players entering must be at least max flow
- * update aggregate weights
- * visualize
  * clean up the code
  *      Maybe handlePlayerMovement function can be the move edge function
  * file input to generate graph
  * have some pointers and comments to explain structure
+ *
+ * run simulation many times and get PoA average
+ * true / false for debug mode?
  */
 
 
 public class Main {
+    // Utility Variable. I cannot modify collection while looping through it, so this is a workaround
+    private static ArrayList<Player> playersToRemove = new ArrayList<>();
+
     public static void main(String[] args) throws InterruptedException {
         CustomGraph frame = new CustomGraph();
+        //TODO frame.createGraphFromFile
         frame.visualize();
+        Graph<String, FlowEdge> graph = frame.getGraph(); //graph data structure of simulation
+        double maxFlow = getMaxFlow(graph);
 
-        Graph<String, FlowEdge> graph = frame.getGraph();
-        String Start = "Start";
-        String End = "End";
-
-
-        //create players
+        //create players and relevant variables
+        int numberOfPlayers = 100;
         ArrayList<Player> players = new ArrayList<>();
         ArrayList<Player> playersBacklog = new ArrayList<>();
-        for(int i=0; i<20; i++) {
-            Player temp = new Player();
-            players.add(temp);
-            playersBacklog.add(temp);
-        }
-
-
         ArrayList<Player> playersInGame = new ArrayList<>();
-        ArrayList<Player> playersToRemove = new ArrayList<>(); // I cannot modify collection while looping through it, so this is a workaround
         ArrayList<Player> playersDone = new ArrayList<>();
-        for(int t = 0; t < 100; t++) {
-            //shortest path remains constant in this single epoch
-            DijkstraShortestPath<String, FlowEdge> dijkstra = new DijkstraShortestPath<>(graph);
-            List<FlowEdge> shortestPathList = dijkstra.getPath(Start, End).getEdgeList();
-            ArrayList<FlowEdge> shortestPath = new ArrayList<>(shortestPathList);
-            // double shortestPathWeight = dijkstra.getPathWeight(Start, End);
-            // System.out.println(shortestPath);
-            // System.out.println("Shortest path weight: " + shortestPathWeight);
+        createPlayers(numberOfPlayers, players, playersBacklog);
 
-            //creates players and add them
-            for(Player player : playersBacklog) {
-                double rand = Math.random();
-                if(rand < 0.3) {
-                    playersInGame.add(player); //TODO put in function
-                    addPlayerToGame(player, playersToRemove, (ArrayList<FlowEdge>) shortestPath.clone(), t);
-                }
+        int numberOfEpochs = 1000;
+        double selfishFlow = 0;
+        for(int t = 0; t < numberOfEpochs; t++) {
+            ArrayList<FlowEdge> shortestPath = getShortestPath("Start", "End", graph); //all players that enter this epoch will have the same path
+            if(!playersBacklog.isEmpty()) {
+                addPlayers(playersBacklog, playersInGame, shortestPath, maxFlow, t);
             }
-            playersBacklog.removeAll(playersToRemove);
-            playersToRemove.clear();
 
-
-            for(Player player : playersInGame) {
-                movePlayer(player, playersToRemove, t);
-            }
-           playersInGame.removeAll(playersToRemove);
-           playersDone.addAll(playersToRemove);
-           playersToRemove.clear();
-
-            for(FlowEdge edge : graph.edgeSet()) {
-                edge.setRemainingCapacity(edge.getCapacity());
-                double newWeight = edge.calculateAggregateWeight();
-                graph.setEdgeWeight(edge, newWeight);
-            }
+            movePlayers(playersInGame, playersDone, t);
+            updateEdges(graph); //reset capacity and calculates new weight
 
             //if all players reached the end, then stop simulation
             if(playersDone.size() == players.size()) {
+                System.out.println("Players Size: " + players.size());
+                System.out.println("t: " + t);
+                selfishFlow = (double) players.size() / t;
                 break;
             }
         }
 
-        System.out.println(playersDone);
-        System.out.println(playersDone.size());
+        double PoA = selfishFlow / maxFlow;
 
-        EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(graph);
-        double maxFlow = ek.calculateMaximumFlow(Start, End);
-        System.out.println(maxFlow);
+        System.out.println("Number of Players Done: " + playersDone.size());
+        System.out.println("Max Flow: " + maxFlow);
+        System.out.println("Selfish Flow: " + selfishFlow);
+        System.out.println("Price of Anarchy: " + PoA);
     }
 
-    public static void addPlayerToGame(Player player, ArrayList<Player> playersToRemove, ArrayList<FlowEdge> path, int t) {
+
+
+    private static void createPlayers(int numberOfPlayers, ArrayList<Player> players, ArrayList<Player> playersBacklog) {
+        for(int i=0; i<numberOfPlayers; i++) {
+            Player temp = new Player();
+            players.add(temp);
+            playersBacklog.add(temp);
+        }
+    }
+
+
+    public static ArrayList<FlowEdge> getShortestPath(String Start, String End, Graph<String, FlowEdge> graph) {
+        DijkstraShortestPath<String, FlowEdge> dijkstra = new DijkstraShortestPath<>(graph);
+        List<FlowEdge> shortestPathList = dijkstra.getPath(Start, End).getEdgeList();
+
+        return new ArrayList<>(shortestPathList);
+    }
+
+    private static void addPlayers(ArrayList<Player> playersBacklog, ArrayList<Player> playersInGame, ArrayList<FlowEdge> shortestPath, double maxFlow, int t) {
+        for(int i=0; i<maxFlow; i++) {
+            Player player = playersBacklog.get(i);
+            addSinglePlayer(player, playersInGame, (ArrayList<FlowEdge>) shortestPath.clone(), t);
+        }
+        playersBacklog.removeAll(playersToRemove);
+        playersToRemove.clear();
+
+        for(Player player : playersBacklog) {
+            double rand = Math.random();
+            if(rand < 0.1) {
+                addSinglePlayer(player, playersInGame, (ArrayList<FlowEdge>) shortestPath.clone(), t);
+            }
+        }
+        playersBacklog.removeAll(playersToRemove);
+        playersToRemove.clear();
+
+    }
+
+    public static void addSinglePlayer(Player player, ArrayList<Player> playersInGame, ArrayList<FlowEdge> path, int t) {
+        playersInGame.add(player);
+
         player.setTimeStarted(t);
         playersToRemove.add(player);
 
@@ -99,11 +114,22 @@ public class Main {
         handleVariablesForMovement(player, player.getEdge());
     }
 
-    public static void movePlayer(Player player, ArrayList<Player> playersToRemove, int t) {
+    private static void movePlayers(ArrayList<Player> playersInGame, ArrayList<Player> playersDone, int t) {
+        for(Player player : playersInGame) {
+            moveSinglePlayer(player, t);
+        }
+
+        playersInGame.removeAll(playersToRemove);
+//        System.out.println(playersToRemove);
+        playersDone.addAll(playersToRemove);
+        playersToRemove.clear();
+    }
+
+    public static void moveSinglePlayer(Player player, int t) {
         if(player.isInsideEdge()) {
             player.moveForward();
             if(player.finishedEdge()) {
-                movePlayerToNextEdge(player, playersToRemove, t);
+                movePlayerToNextEdge(player, t);
             }
         } else {
             handleVariablesForMovement(player, player.getEdge());
@@ -111,12 +137,12 @@ public class Main {
 
     }
 
-    public static void movePlayerToNextEdge(Player player, ArrayList<Player> playersToRemove, int t) {
+    public static void movePlayerToNextEdge(Player player, int t) {
         FlowEdge oldEdge = player.removeOldEdge();
         oldEdge.getPlayersInEdge().remove(player);
 
         if(player.reachedEndOfGraph()) {
-            handlePlayerReachingEnd(player, playersToRemove, t);
+            handlePlayerReachingEnd(player, t);
             return;
         }
 
@@ -124,7 +150,7 @@ public class Main {
         handleVariablesForMovement(player, nextEdge);
     }
 
-    public static void handlePlayerReachingEnd(Player player, ArrayList<Player> playersToRemove, int t) {
+    public static void handlePlayerReachingEnd(Player player, int t) {
         playersToRemove.add(player);
         player.calculateTimeTotal(t);
     }
@@ -142,5 +168,18 @@ public class Main {
             nextEdge.getQueue().add(player); //if no space is available, the player waits in a queue
             player.setRemainingTimeForEdge(-1);
         }
+    }
+
+    private static void updateEdges(Graph<String, FlowEdge> graph) {
+        for(FlowEdge edge : graph.edgeSet()) {
+            edge.setRemainingCapacity(edge.getCapacity());
+            double newWeight = edge.calculateAggregateWeight();
+            graph.setEdgeWeight(edge, newWeight);
+        }
+    }
+
+    private static double getMaxFlow(Graph<String, FlowEdge> graph) {
+        EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(graph);
+        return ek.calculateMaximumFlow("Start", "End");
     }
 }

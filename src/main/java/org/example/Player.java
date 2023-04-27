@@ -14,9 +14,6 @@ public class Player {
 
     public Player() {
     }
-    public Player(ArrayList<FlowEdge> path) {
-        this.setPath(path);
-    }
 
     public FlowEdge getEdge() {
         return path.get(0);
@@ -26,6 +23,9 @@ public class Player {
         return this.position.getQueue().contains(this);
     }
 
+    /**
+     * determines whether a player is eligible to enter the queue, or if they are too far back in the queue
+     */
     public boolean canLeaveQueue() {
         int queueIndex = this.position.getQueue().indexOf(this);
         if(queueIndex == -1) {

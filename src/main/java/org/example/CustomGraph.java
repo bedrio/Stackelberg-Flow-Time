@@ -83,8 +83,5 @@ public class CustomGraph extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
-
-//        mxCircleLayout layout = new mxCircleLayout(jgxAdapter);
-//        mxFastOrganicLayout layout = new mxFastOrganicLayout(jgxAdapter);
     }
 }

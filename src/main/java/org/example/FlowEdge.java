@@ -33,7 +33,8 @@ public class FlowEdge extends DefaultWeightedEdge {
     //TODO Maybe implement dynamic calculation?
     // So far, this calculates the maximum delay possible
     public double calculateAggregateWeight() {
-        return this.queue.size() + this.actualWeight;
+        return ( this.queue.size() / this.capacity ) + this.actualWeight;
+        //return this.queue.size() + this.actualWeight;
     }
 
     public double getWeightSetInGraph() {

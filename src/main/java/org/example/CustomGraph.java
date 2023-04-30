@@ -1,6 +1,7 @@
 package org.example;
 
 import com.mxgraph.layout.mxCompactTreeLayout;
+import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
@@ -63,6 +64,7 @@ public class CustomGraph extends JFrame {
             FlowEdge tempEdge = this.graph.addEdge(Source, Target);
             this.graph.setEdgeWeight(tempEdge, delay);
             tempEdge.setActualWeight(delay);
+            tempEdge.setRemainingCapacity(capacity);
             tempEdge.setCapacity(capacity);
         }
         return this.graph;
@@ -90,7 +92,8 @@ public class CustomGraph extends JFrame {
 
 
         mxGraphComponent graphComponent = new mxGraphComponent(jgxAdapter);
-        mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);
+        mxFastOrganicLayout layout = new mxFastOrganicLayout(jgxAdapter);
+        //mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);
         layout.execute(jgxAdapter.getDefaultParent());
         add(graphComponent);
 

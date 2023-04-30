@@ -81,7 +81,7 @@ public class Simulation {
             System.out.println("Max Flow Weighted Average: " + maxFlowWeightedAverage);
             System.out.println("Selfish Flow: " + selfishFlow);
         }
-        double PoA = selfishFlow / maxFlowWeightedAverage;
+        double PoA = maxFlowWeightedAverage/ selfishFlow;
         return PoA;
     }
 

@@ -73,7 +73,7 @@ public class CustomGraph extends JFrame {
 
         HashMap<FlowEdge, mxICell> edgesMap = jgxAdapter.getEdgeToCellMap();
         for (var entry : edgesMap.entrySet()) {
-            entry.getValue().setValue("1 | 2");
+            entry.getValue().setValue(entry.getKey().getCapacity());
         }
 
         HashMap<String, mxICell> VertexMap = jgxAdapter.getVertexToCellMap();
@@ -82,8 +82,8 @@ public class CustomGraph extends JFrame {
             jgxAdapter.resizeCell(entry.getValue(), x);
         }
 
-        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
-//        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_LABEL_BACKGROUNDCOLOR, "#A3BB00");
+//        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
+        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_LABEL_BACKGROUNDCOLOR, "#A3BB00");
 //        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.LABEL, "#A3BB00");
         jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_SHAPE, "1");
         jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_FONTSIZE, "20");

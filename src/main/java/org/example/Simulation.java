@@ -42,8 +42,6 @@ public class Simulation {
         AllDirectedPaths<String, FlowEdge> allDirectedPaths = new AllDirectedPaths<>(graph);
         List<GraphPath<String, FlowEdge>> flowPaths = allDirectedPaths.getAllPaths("Start", "End",false, 999999);
         List<GraphPath<String, FlowEdge>> flowPathsReached = new ArrayList<>();
-        System.out.println(flowPaths);
-
 
         double maxFlow = getMaxFlow(builder.getCapacityGraph());
         double maxFlowOverTime = 0;
@@ -140,7 +138,6 @@ public class Simulation {
         }
 
         playersInGame.removeAll(playersToRemove);
-//        System.out.println(playersToRemove);
         playersDone.addAll(playersToRemove);
         playersToRemove.clear();
     }
@@ -225,11 +222,11 @@ public class Simulation {
             if(!flowPathsReached.isEmpty()) {
                 CustomGraph tempBuilder = new CustomGraph(flowPathsReached);
                 incrementValue = getMaxFlow(tempBuilder.getGraph());
-            }
 
-            if(simpleDebug) {
-                System.out.println("Max Flow Increment: " + incrementValue);
-                System.out.println("--time: " + t);
+                if(simpleDebug) {
+                    System.out.println("Max Flow Increment: " + incrementValue);
+                    System.out.println("--time: " + t);
+                }
             }
         }
 

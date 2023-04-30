@@ -1,11 +1,9 @@
 package org.example;
 
-import com.mxgraph.layout.*;
-import com.mxgraph.model.mxGeometry;
+import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
-import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
@@ -13,8 +11,7 @@ import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import javax.swing.*;
-import java.awt.*;
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

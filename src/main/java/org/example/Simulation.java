@@ -9,6 +9,7 @@ import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 public class Simulation {
@@ -32,11 +33,10 @@ public class Simulation {
         this.playersDone = new ArrayList<>(); //players that finished the game
     }
 
-    public double simulate(int numberOfPlayers, int numberOfEpochs, double chanceOfPlayerEntering, boolean visualize, boolean simpleDebug) throws IOException {
+    public double simulate(int numberOfPlayers, int numberOfEpochs, int minExtraPlayers, int maxExtraPlayers, boolean visualize, boolean simpleDebug) throws IOException {
         if(visualize) {
             builder.visualize();
         }
-
         createPlayers(numberOfPlayers);
 
         AllDirectedPaths<String, FlowEdge> allDirectedPaths = new AllDirectedPaths<>(graph);
@@ -49,13 +49,33 @@ public class Simulation {
         double selfishFlow = 0;
         int t = 0;
         for(; t < numberOfEpochs; t++) {
-            ArrayList<FlowEdge> shortestPath = getShortestPath("Start", "End"); //all players that enter this epoch will have the same path
-            if(!playersBacklog.isEmpty()) {
-                addPlayers(shortestPath, maxFlow, t, chanceOfPlayerEntering);
+            // calculate number of extra players
+            if(!playersInGame.isEmpty()) {
+                boolean resetCapacity = true;
+                movePlayers(t);
+                updateEdges(resetCapacity);
             }
 
-            movePlayers(t);
-            updateEdges(); //reset capacity and calculates new weight
+            int extraPlayers = new Random().nextInt(maxExtraPlayers + 1);
+            for(int i=0; i < (maxFlow + extraPlayers); i++) {
+                if(i >= playersBacklog.size()) {
+                    break;
+                }
+                Player player = playersBacklog.get(i);
+                ArrayList<FlowEdge> shortestPath = getShortestPath("Start", "End"); //all players that enter this epoch will have the same path
+
+                addSinglePlayer(player, (ArrayList<FlowEdge>) shortestPath.clone(), t);
+                playersBacklog.removeAll(playersToRemove);
+                playersToRemove.clear();
+
+                moveSinglePlayer(player, t);
+                playersInGame.removeAll(playersToRemove);
+                playersDone.addAll(playersToRemove);
+                playersToRemove.clear();
+
+                boolean resetCapacity = false;
+                updateEdges(resetCapacity); //reset capacity and calculates new weight
+            }
 
             if(flowPaths.isEmpty()) {
                 maxFlowIncrementValue = maxFlow;
@@ -63,7 +83,6 @@ public class Simulation {
                 maxFlowIncrementValue += getIncrementValue(flowPaths, flowPathsReached, t, simpleDebug);
             }
             maxFlowOverTime += maxFlowIncrementValue;
-
 
             if(allPlayersFinished()) {
                 break;
@@ -118,7 +137,6 @@ public class Simulation {
         }
         playersBacklog.removeAll(playersToRemove);
         playersToRemove.clear();
-
     }
 
     public void addSinglePlayer(Player player, ArrayList<FlowEdge> path, int t) {
@@ -186,9 +204,11 @@ public class Simulation {
         }
     }
 
-    public void updateEdges() {
+    public void updateEdges(boolean resetCapacity) {
         for(FlowEdge edge : graph.edgeSet()) {
-            edge.setRemainingCapacity(edge.getCapacity());
+            if(resetCapacity) {
+                edge.setRemainingCapacity(edge.getCapacity());
+            }
             double newWeight = edge.calculateAggregateWeight();
             graph.setEdgeWeight(edge, newWeight);
         }

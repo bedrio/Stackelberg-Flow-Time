@@ -1,7 +1,6 @@
 package org.example;
 
 import java.io.IOException;
-import java.nio.file.attribute.PosixFileAttributes;
 
 
 // have hardcoded variables for Arya to change
@@ -14,7 +13,8 @@ public class Main {
         int numberOfPlayers = 1000;
         int numberOfEpochs = 100000;
         double chanceOfPlayerEntering = 0.0; //After the max flow number of players enter, each individual player has this value's chance to enter as well
-
+        int minExtraPlayers = 0;
+        int maxExtraPlayers = 20;
 //        double total_POA = 0;
 //        double total_POA_improved = 0;
 //        for (int i = 0; i < 100; i++) {
@@ -33,14 +33,13 @@ public class Main {
 //        System.out.println("Price of Anarchy: " + avgPOA);
 //        System.out.println("Price of Anarchy: " + avgPOA_improved);
 
-
         Simulation simulation = new Simulation("Vertices4.csv", "Edges4.csv");
         Simulation simulation_improved = new Simulation("Vertices4.csv", "Edges4_improved.csv");
 
-        double PoA = simulation.simulate(numberOfPlayers, numberOfEpochs, chanceOfPlayerEntering, visualize, simpleDebug);
-        double PoA_improved = simulation_improved.simulate(numberOfPlayers, numberOfEpochs, chanceOfPlayerEntering, visualize, simpleDebug);
+        double PoA = simulation.simulate(numberOfPlayers, numberOfEpochs, minExtraPlayers, maxExtraPlayers, visualize, simpleDebug);
+        double PoA_improved = simulation_improved.simulate(numberOfPlayers, numberOfEpochs, minExtraPlayers, maxExtraPlayers, visualize, simpleDebug);
         System.out.println("Price of Anarchy: " + PoA);
-        System.out.println("Price of Anarchy: " + PoA_improved);
+        System.out.println("Improved Price of Anarchy: " + PoA_improved);
 
     }
 }

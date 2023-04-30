@@ -1,13 +1,18 @@
 package org.example;
 
 import com.mxgraph.layout.*;
+import com.mxgraph.model.mxGeometry;
+import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxPoint;
+import com.mxgraph.util.mxRectangle;
 import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,56 +24,7 @@ public class CustomGraph extends JFrame {
     Graph<String, FlowEdge> graph;
     Graph<String, FlowEdge> capacityGraph;
 
-    public CustomGraph() {
-//        this.graph = new SimpleDirectedWeightedGraph<>(FlowEdge.class);
-//
-//        //create vertices and assign them
-//        String Start = "Start";
-//        String A = "A";
-//        String B = "B";
-//        String C = "C";
-//        String End = "End";
-//        this.graph.addVertex(Start);
-//        this.graph.addVertex(A);
-//        this.graph.addVertex(B);
-//        this.graph.addVertex(C);
-//        this.graph.addVertex(End);
-//
-//        //create edges
-//        FlowEdge E_Start_A = this.graph.addEdge(Start, A);
-//        this.graph.setEdgeWeight(E_Start_A, 3);
-//        E_Start_A.setActualWeight(3);
-//        E_Start_A.setCapacity(7);
-//
-//        FlowEdge E_Start_C = this.graph.addEdge(Start, C);
-//        this.graph.setEdgeWeight(E_Start_C, 2);
-//        E_Start_C.setActualWeight(2);
-//        E_Start_C.setCapacity(10);
-//
-//        FlowEdge E_A_B = this.graph.addEdge(A, B);
-//        this.graph.setEdgeWeight(E_A_B, 2);
-//        E_A_B.setActualWeight(2);
-//        E_A_B.setCapacity(7);
-//
-//        FlowEdge E_B_End = this.graph.addEdge(B, End);
-//        this.graph.setEdgeWeight(E_B_End, 1);
-//        E_B_End.setActualWeight(1);
-//        E_B_End.setCapacity(5);
-//
-//        FlowEdge E_C_B = this.graph.addEdge(C, B);
-//        this.graph.setEdgeWeight(E_C_B, 2);
-//        E_C_B.setActualWeight(2);
-//        E_C_B.setCapacity(3);
-//
-//        FlowEdge E_C_End = this.graph.addEdge(C, End);
-//        this.graph.setEdgeWeight(E_C_End, 5);
-//        E_C_End.setActualWeight(5);
-//        E_C_End.setCapacity(10);
-    }
-
-//    public Graph<String, FlowEdge> getGraph() {
-//        return this.graph;
-//    }
+    public CustomGraph() {}
 
     public Graph<String, FlowEdge> createGraphFromFiles(String VerticesFilePath, String EdgeFilePath) throws IOException {
         this.graph = new SimpleDirectedWeightedGraph<>(FlowEdge.class);
@@ -95,15 +51,29 @@ public class CustomGraph extends JFrame {
             tempEdge.setActualWeight(delay);
             tempEdge.setCapacity(capacity);
         }
-        System.out.println(this.graph);
         return this.graph;
     }
 
     public void visualize() {
         JGraphXAdapter<String, FlowEdge> jgxAdapter = new JGraphXAdapter<>(this.graph);
+
+        HashMap<FlowEdge, mxICell> edgesMap = jgxAdapter.getEdgeToCellMap();
+        for (var entry : edgesMap.entrySet()) {
+            entry.getValue().setValue("1 | 2");
+        }
+
+        HashMap<String, mxICell> VertexMap = jgxAdapter.getVertexToCellMap();
+        for (var entry : VertexMap.entrySet()) {
+            mxRectangle x = new mxRectangle(0, 0, 100, 100);
+            jgxAdapter.resizeCell(entry.getValue(), x);
+        }
+
         jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
+//        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_LABEL_BACKGROUNDCOLOR, "#A3BB00");
+//        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.LABEL, "#A3BB00");
         jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_SHAPE, "1");
-        jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_FONTSIZE, "13");
+        jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_FONTSIZE, "20");
+
 
         mxGraphComponent graphComponent = new mxGraphComponent(jgxAdapter);
         mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);

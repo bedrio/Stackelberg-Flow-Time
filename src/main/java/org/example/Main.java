@@ -2,11 +2,15 @@ package org.example;
 
 import java.io.IOException;
 
+
+// have hardcoded variables for Arya to change
+// effective max flow vs flow
+// visualization add-ons
 public class Main {
     public static void main(String[] args) throws IOException {
         boolean visualize = true;
         boolean simpleDebug = true;
-        int numberOfPlayers = 100;
+        int numberOfPlayers = 10000;
         int numberOfEpochs = 1000;
         double chanceOfPlayerEntering = 0.1; //After the max flow number of players enter, each individual player has this value's chance to enter as well
 

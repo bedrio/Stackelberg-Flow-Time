@@ -21,9 +21,9 @@ public class Simulation {
     private ArrayList<Player> playersInGame;
     private ArrayList<Player> playersDone;
 
-    public Simulation() throws IOException {
+    public Simulation(String verticesFileName, String edgesFileName) throws IOException {
         this.builder = new CustomGraph();
-        this.graph = builder.createGraphFromFiles("Vertices.csv", "Edges.csv");
+        this.graph = builder.createGraphFromFiles(verticesFileName, edgesFileName);
 
         //Very helpful for debugging
         this.players = new ArrayList<>(); //all players
@@ -54,7 +54,6 @@ public class Simulation {
                 addPlayers(shortestPath, maxFlow, t, chanceOfPlayerEntering);
             }
 
-
             movePlayers(t);
             updateEdges(); //reset capacity and calculates new weight
 
@@ -78,7 +77,7 @@ public class Simulation {
             System.out.println("Number of Epochs Used: " + t);
             System.out.println("Max Flow: " + maxFlow);
             System.out.println("Max Flow Over Time: " + maxFlowOverTime);
-            System.out.println("Max Flow Weighted Average: " + maxFlowWeightedAverage);
+            System.out.println("Max Flow Average: " + maxFlowWeightedAverage);
             System.out.println("Selfish Flow: " + selfishFlow);
         }
         double PoA = maxFlowWeightedAverage/ selfishFlow;

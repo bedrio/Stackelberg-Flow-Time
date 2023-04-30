@@ -8,7 +8,9 @@ import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class Simulation {
@@ -39,17 +41,19 @@ public class Simulation {
 
         createPlayers(numberOfPlayers);
 
-//        AllDirectedPaths<String, FlowEdge> allDirectedPaths = new AllDirectedPaths<>(graph);
-//        List<GraphPath<String, FlowEdge>> flowPaths = allDirectedPaths.getAllPaths("Start", "End",false, 999999);
-//        List<GraphPath<String, FlowEdge>> flowPathsReached = new ArrayList<>();
-//        System.out.println(flowPaths);
+        AllDirectedPaths<String, FlowEdge> allDirectedPaths = new AllDirectedPaths<>(graph);
+        List<GraphPath<String, FlowEdge>> flowPaths = allDirectedPaths.getAllPaths("Start", "End",false, 999999);
+        List<GraphPath<String, FlowEdge>> flowPathsReached = new ArrayList<>();
+        System.out.println(flowPaths);
 
 
         double maxFlow = getMaxFlow();
         double maxFlowOverTime = 0;
         double maxFlowIncrementValue = 0;
+        Map<Double, Double> maxFlowWeighted = new HashMap<>();
         double selfishFlow = 0;
-        for(int t = 0; t < numberOfEpochs; t++) {
+        int t = 0;
+        for(; t < numberOfEpochs; t++) {
             ArrayList<FlowEdge> shortestPath = getShortestPath("Start", "End"); //all players that enter this epoch will have the same path
             if(!playersBacklog.isEmpty()) {
                 addPlayers(shortestPath, maxFlow, t, chanceOfPlayerEntering);
@@ -59,29 +63,31 @@ public class Simulation {
             movePlayers(t);
             updateEdges(); //reset capacity and calculates new weight
 
-//            if(flowPaths.isEmpty()) {
-//                maxFlowIncrementValue = maxFlow;
-//            } else {
-//                maxFlowIncrementValue += getIncrementValue(flowPaths, flowPathsReached, t);
-//            }
-//            maxFlowOverTime += maxFlowIncrementValue;
-
-            selfishFlow = getSelfishFlow(t);
-            if(simpleDebug) {
-                System.out.println("Number of Players Done: " + playersDone.size());
-                System.out.println("Number of Epochs Used: " + t);
-                System.out.println("Max Flow: " + maxFlow);
-                System.out.println("Selfish Flow: " + selfishFlow);
+            if(flowPaths.isEmpty()) {
+                maxFlowIncrementValue = maxFlow;
+            } else {
+                maxFlowIncrementValue += getIncrementValue(flowPaths, flowPathsReached, t);
             }
+            updateMaxFlowWeights(maxFlowIncrementValue, maxFlowWeighted);
+            maxFlowOverTime += maxFlowIncrementValue;
 
-            //if all players reached the end, then stop simulation
             if(allPlayersFinished()) {
                 break;
             }
         }
 
-//        double PoA = selfishFlow / (maxFlow / playersDone.size());
-        return maxFlow / selfishFlow;
+        double maxFlowWeightedAverage = getWeightedAverage(maxFlowWeighted, t);
+        selfishFlow = getSelfishFlow(t);
+        if(simpleDebug) {
+            System.out.println("Number of Players Done: " + playersDone.size());
+            System.out.println("Number of Epochs Used: " + t);
+            System.out.println("Max Flow: " + maxFlow);
+            System.out.println("Max Flow Over Time: " + maxFlowOverTime);
+            System.out.println("Max Flow Weighted Average: " + maxFlowWeightedAverage);
+            System.out.println("Selfish Flow: " + selfishFlow);
+        }
+        double PoA = selfishFlow / maxFlowWeightedAverage;
+        return PoA;
     }
 
     public void createPlayers(int numberOfPlayers) {
@@ -287,6 +293,25 @@ public class Simulation {
 
         edgeListA.retainAll(edgeListB);
         return (ArrayList<FlowEdge>) edgeListA; //returns the retained edges as an ArrayList
+    }
+
+    private void updateMaxFlowWeights(double maxFlowIncrementValue, Map<Double, Double> maxFlowWeighted) {
+        if(maxFlowWeighted.containsKey(maxFlowIncrementValue)) {
+            double instancesOfIncrement = maxFlowWeighted.get(maxFlowIncrementValue);
+            instancesOfIncrement++;
+            maxFlowWeighted.put(maxFlowIncrementValue, instancesOfIncrement);
+        } else {
+            maxFlowWeighted.put(maxFlowIncrementValue, 1.0);
+        }
+    }
+
+    private double getWeightedAverage(Map<Double, Double> maxFlowWeighted, int t) {
+        double weightedTotal = 0;
+        for (var entry : maxFlowWeighted.entrySet()) {
+            weightedTotal += entry.getKey() * entry.getValue();
+        }
+
+        return weightedTotal / t;
     }
 
 }

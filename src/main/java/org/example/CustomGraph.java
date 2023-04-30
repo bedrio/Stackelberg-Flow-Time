@@ -8,6 +8,7 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
@@ -16,6 +17,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CustomGraph extends JFrame {
@@ -25,6 +27,21 @@ public class CustomGraph extends JFrame {
     Graph<String, FlowEdge> capacityGraph;
 
     public CustomGraph() {}
+
+    public CustomGraph(List<GraphPath<String, FlowEdge>> paths) {
+        this.graph = new SimpleDirectedWeightedGraph<>(FlowEdge.class);
+
+        for(GraphPath<String, FlowEdge> path : paths) {
+            for(String vertex : path.getVertexList()) {
+                graph.addVertex(vertex);
+            }
+
+            for(FlowEdge edge : path.getEdgeList()) {
+                graph.addEdge(edge.getSource(), edge.getTarget(), edge);
+                graph.setEdgeWeight(edge, edge.getCapacity());
+            }
+        }
+    }
 
     public Graph<String, FlowEdge> createGraphFromFiles(String VerticesFilePath, String EdgeFilePath) throws IOException {
         this.graph = new SimpleDirectedWeightedGraph<>(FlowEdge.class);
@@ -94,5 +111,9 @@ public class CustomGraph extends JFrame {
         }
 
         return capacityGraph;
+    }
+
+    public Graph<String, FlowEdge> getGraph() {
+        return graph;
     }
 }

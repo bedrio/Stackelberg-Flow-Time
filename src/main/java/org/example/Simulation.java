@@ -47,10 +47,9 @@ public class Simulation {
         System.out.println(flowPaths);
 
 
-        double maxFlow = getMaxFlow();
+        double maxFlow = getMaxFlow(builder.getCapacityGraph());
         double maxFlowOverTime = 0;
         double maxFlowIncrementValue = 0;
-        Map<Double, Double> maxFlowWeighted = new HashMap<>();
         double selfishFlow = 0;
         int t = 0;
         for(; t < numberOfEpochs; t++) {
@@ -66,17 +65,17 @@ public class Simulation {
             if(flowPaths.isEmpty()) {
                 maxFlowIncrementValue = maxFlow;
             } else {
-                maxFlowIncrementValue += getIncrementValue(flowPaths, flowPathsReached, t);
+                maxFlowIncrementValue += getIncrementValue(flowPaths, flowPathsReached, t, simpleDebug);
             }
-            updateMaxFlowWeights(maxFlowIncrementValue, maxFlowWeighted);
             maxFlowOverTime += maxFlowIncrementValue;
+
 
             if(allPlayersFinished()) {
                 break;
             }
         }
 
-        double maxFlowWeightedAverage = getWeightedAverage(maxFlowWeighted, t);
+        double maxFlowWeightedAverage = maxFlowOverTime / t;
         selfishFlow = getSelfishFlow(t);
         if(simpleDebug) {
             System.out.println("Number of Players Done: " + playersDone.size());
@@ -209,109 +208,33 @@ public class Simulation {
         return (double) playersDone.size() / t;
     }
 
-    public double getMaxFlow() {
-        Graph<String, FlowEdge> capacityGraph = builder.getCapacityGraph();
-
-        EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(capacityGraph);
+    public double getMaxFlow(Graph<String, FlowEdge> graph) {
+        EdmondsKarpMFImpl<String, FlowEdge> ek = new EdmondsKarpMFImpl<>(graph);
         return ek.calculateMaximumFlow("Start", "End");
     }
 
-    public double getIncrementValue(List<GraphPath<String, FlowEdge>> flowPaths, List<GraphPath<String, FlowEdge>> flowPathsReached, int t) {
+    public double getIncrementValue(List<GraphPath<String, FlowEdge>> flowPaths, List<GraphPath<String, FlowEdge>> flowPathsReached, int t, boolean simpleDebug) {
+        // build graph with paths reached
+        // get maxflow of that graph
         double incrementValue = 0;
         for(int i = 0; i < flowPaths.size(); i++) {
             GraphPath<String, FlowEdge> path = flowPaths.get(i);
-
             if(t >= path.getWeight()) {
-                if(flowPathsReached.isEmpty()) {
-                    incrementValue += getMinCapacity((ArrayList<FlowEdge>) path.getEdgeList());
-                } else {
-                    incrementValue += getIntermediateStageIncrement(path, flowPathsReached);
-                }
-
                 flowPathsReached.add(path);
                 flowPaths.remove(path);
+            }
+
+            if(!flowPathsReached.isEmpty()) {
+                CustomGraph tempBuilder = new CustomGraph(flowPathsReached);
+                incrementValue = getMaxFlow(tempBuilder.getGraph());
+            }
+
+            if(simpleDebug) {
+                System.out.println("Max Flow Increment: " + incrementValue);
+                System.out.println("--time: " + t);
             }
         }
 
         return incrementValue;
     }
-
-    public double getMinCapacity(ArrayList<FlowEdge> path) {
-        double minCapacity = Double.MAX_VALUE;
-        for(FlowEdge edge : path) {
-            if(edge.getCapacity() < minCapacity) {
-                minCapacity = edge.getCapacity();
-            }
-        }
-
-        return minCapacity;
-    }
-
-    private double getIntermediateStageIncrement(GraphPath<String, FlowEdge> newPath, List<GraphPath<String, FlowEdge>> flowPathsReached) {
-        double lowestIncrementValue = Double.MAX_VALUE;
-        for(GraphPath<String, FlowEdge> path : flowPathsReached) {
-            double tempIncrement = getSharedEdgeIncrement(newPath, path);
-
-            if(tempIncrement < lowestIncrementValue) {
-                lowestIncrementValue = tempIncrement;
-            }
-        }
-
-        return lowestIncrementValue;
-    }
-
-    private double getSharedEdgeIncrement(GraphPath<String, FlowEdge> newPath, GraphPath<String, FlowEdge> path) {
-        double newIncrementValue = 0;
-
-        if(pathsShareEdge(newPath, path)) {
-            ArrayList<FlowEdge> sharedEdges = getSharedEdges(newPath, path);
-            double oldMinCapacity = getMinCapacity((ArrayList<FlowEdge>) path.getEdgeList());
-            double newMinCapacity = getMinCapacity((ArrayList<FlowEdge>) newPath.getEdgeList());
-            double sharedMinCapacity = getMinCapacity(sharedEdges);
-            if(sharedMinCapacity == oldMinCapacity) {
-                newIncrementValue = 0;
-            } else {
-                double difference = sharedMinCapacity - oldMinCapacity;
-                newIncrementValue = Math.min(difference, newMinCapacity);
-            }
-        }
-
-        return newIncrementValue;
-    }
-
-    private boolean pathsShareEdge(GraphPath<String, FlowEdge> pathA, GraphPath<String, FlowEdge> pathB) {
-        List<FlowEdge> edgeListA = pathA.getEdgeList();
-        List<FlowEdge> edgeListB = pathB.getEdgeList();
-
-        return edgeListA.retainAll(edgeListB); //retainAll returns a true/false boolean
-    }
-
-    //this assumes that the two paths do indeed share an edge
-    private ArrayList<FlowEdge> getSharedEdges(GraphPath<String, FlowEdge> pathA, GraphPath<String, FlowEdge> pathB) {
-        List<FlowEdge> edgeListA = pathA.getEdgeList();
-        List<FlowEdge> edgeListB = pathB.getEdgeList();
-
-        edgeListA.retainAll(edgeListB);
-        return (ArrayList<FlowEdge>) edgeListA; //returns the retained edges as an ArrayList
-    }
-
-    private void updateMaxFlowWeights(double maxFlowIncrementValue, Map<Double, Double> maxFlowWeighted) {
-        if(maxFlowWeighted.containsKey(maxFlowIncrementValue)) {
-            double instancesOfIncrement = maxFlowWeighted.get(maxFlowIncrementValue);
-            instancesOfIncrement++;
-            maxFlowWeighted.put(maxFlowIncrementValue, instancesOfIncrement);
-        } else {
-            maxFlowWeighted.put(maxFlowIncrementValue, 1.0);
-        }
-    }
-
-    private double getWeightedAverage(Map<Double, Double> maxFlowWeighted, int t) {
-        double weightedTotal = 0;
-        for (var entry : maxFlowWeighted.entrySet()) {
-            weightedTotal += entry.getKey() * entry.getValue();
-        }
-
-        return weightedTotal / t;
-    }
-
 }

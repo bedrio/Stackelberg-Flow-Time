@@ -1,7 +1,6 @@
 package org.example;
 
 import com.mxgraph.layout.mxCompactTreeLayout;
-import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
@@ -84,15 +83,12 @@ public class CustomGraph extends JFrame {
             jgxAdapter.resizeCell(entry.getValue(), x);
         }
 
-//        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
         jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_LABEL_BACKGROUNDCOLOR, "#A3BB00");
-//        jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.LABEL, "#A3BB00");
         jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_SHAPE, "1");
         jgxAdapter.getStylesheet().getDefaultVertexStyle().put(mxConstants.STYLE_FONTSIZE, "20");
 
 
         mxGraphComponent graphComponent = new mxGraphComponent(jgxAdapter);
-//        mxFastOrganicLayout layout = new mxFastOrganicLayout(jgxAdapter);
         mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);
         layout.execute(jgxAdapter.getDefaultParent());
         add(graphComponent);

@@ -1,6 +1,0 @@
-Source,Target,Delay,Capacity
-Start,A,3,2
-Start,B,1,2
-A,End,3,2
-B,C,2,2
-C,End,1,2

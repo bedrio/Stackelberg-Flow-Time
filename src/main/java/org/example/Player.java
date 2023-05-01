@@ -3,9 +3,6 @@ package org.example;
 import java.util.ArrayList;
 
 public class Player {
-    //TODO nextEdge in line
-    //TODO calculate timepassed?
-
     ArrayList<FlowEdge> path = new ArrayList<>();
     FlowEdge position;
     int timeStarted = 0;
@@ -23,9 +20,7 @@ public class Player {
         return this.position.getQueue().contains(this);
     }
 
-    /**
-     * determines whether a player is eligible to enter the queue, or if they are too far back in the queue
-     */
+
     public boolean canLeaveQueue() {
         int queueIndex = this.position.getQueue().indexOf(this);
         if(queueIndex == -1) {

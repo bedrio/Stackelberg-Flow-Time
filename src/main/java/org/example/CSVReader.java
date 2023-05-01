@@ -6,37 +6,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class CSVReader {
-    String path = "src/main/java/org/example/";
-
-    public ArrayList<String> readSingleColumnCSV(String fileName) {
-        ArrayList<String> data = new ArrayList<>();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(this.path + fileName));
-            String line;
-            while ((line = br.readLine()) != null) {
-                StringTokenizer st = new StringTokenizer(line, ",");
-                String[] row = new String[st.countTokens()];
-                for (int i = 0; i < row.length; i++) {
-                    row[i] = st.nextToken();
-                }
-                data.add(Arrays.toString(row));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (br != null) {
-                    br.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        data.remove(0); //Deletes column headers
-        return data;
-    }
+    String path = "src/main/java/org/example/graphs/";
 
     public ArrayList<Map<String, String>> readCSV(String fileName) {
         String line = "";

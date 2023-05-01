@@ -3,15 +3,6 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.util.ArrayList;
 
-/***
- * Fields include:
- *  Source
- *  Target
- *  Weight
- *  Capacity
- *  PlayersInEdge
- *  Queue
- */
 public class FlowEdge extends DefaultWeightedEdge {
     double capacity = 0;
     double remainingCapacity = 0;
@@ -30,11 +21,8 @@ public class FlowEdge extends DefaultWeightedEdge {
         this.remainingCapacity = this.remainingCapacity - 1;
     }
 
-    //TODO Maybe implement dynamic calculation?
-    // So far, this calculates the maximum delay possible
     public double calculateAggregateWeight() {
         return ( ((double) this.queue.size()) / this.capacity ) + this.actualWeight;
-        //return this.queue.size() + this.actualWeight;
     }
 
     public double getWeightSetInGraph() {

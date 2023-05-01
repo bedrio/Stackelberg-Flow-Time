@@ -9,8 +9,6 @@ import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
 
 public class Simulation {
     // Utility Variable. I cannot modify collection while looping through it, so this is a workaround
@@ -111,27 +109,6 @@ public class Simulation {
         return new ArrayList<>(shortestPathList);
     }
 
-    public void addPlayers(ArrayList<FlowEdge> shortestPath, double maxFlow, int t, double chanceOfPlayerEntering) {
-        for(int i=0; i<maxFlow; i++) {
-            if(i >= playersBacklog.size()) {
-                break;
-            }
-            Player player = playersBacklog.get(i);
-            addSinglePlayer(player, (ArrayList<FlowEdge>) shortestPath.clone(), t);
-        }
-        playersBacklog.removeAll(playersToRemove);
-        playersToRemove.clear();
-
-        for(Player player : playersBacklog) {
-            double rand = Math.random();
-            if(rand < chanceOfPlayerEntering) {
-                addSinglePlayer(player, (ArrayList<FlowEdge>) shortestPath.clone(), t);
-            }
-        }
-        playersBacklog.removeAll(playersToRemove);
-        playersToRemove.clear();
-    }
-
     public void addSinglePlayer(Player player, ArrayList<FlowEdge> path, int t) {
         playersInGame.add(player);
         player.setTimeStarted(t);
@@ -221,8 +198,6 @@ public class Simulation {
     }
 
     public double getIncrementValue(List<GraphPath<String, FlowEdge>> flowPaths, List<GraphPath<String, FlowEdge>> flowPathsReached, int t, boolean simpleDebug) {
-        // build graph with paths reached
-        // get maxflow of that graph
         double incrementValue = 0;
         for(int i = 0; i < flowPaths.size(); i++) {
             GraphPath<String, FlowEdge> path = flowPaths.get(i);

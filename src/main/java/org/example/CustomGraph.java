@@ -92,8 +92,8 @@ public class CustomGraph extends JFrame {
 
 
         mxGraphComponent graphComponent = new mxGraphComponent(jgxAdapter);
-        mxFastOrganicLayout layout = new mxFastOrganicLayout(jgxAdapter);
-        //mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);
+//        mxFastOrganicLayout layout = new mxFastOrganicLayout(jgxAdapter);
+        mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);
         layout.execute(jgxAdapter.getDefaultParent());
         add(graphComponent);
 

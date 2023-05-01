@@ -57,21 +57,18 @@ public class Simulation {
             }
 
             int extraPlayers = new Random().nextInt(maxExtraPlayers + 1);
+
+
+
             for(int i=0; i < (maxFlow + extraPlayers); i++) {
-                if(i >= playersBacklog.size()) {
+                if(playersBacklog.isEmpty()) {
                     break;
                 }
-                Player player = playersBacklog.get(i);
+                Player player = playersBacklog.remove(0);
                 ArrayList<FlowEdge> shortestPath = getShortestPath("Start", "End"); //all players that enter this epoch will have the same path
 
                 addSinglePlayer(player, (ArrayList<FlowEdge>) shortestPath.clone(), t);
-                playersBacklog.removeAll(playersToRemove);
-                playersToRemove.clear();
-
                 moveSinglePlayer(player, t);
-                playersInGame.removeAll(playersToRemove);
-                playersDone.addAll(playersToRemove);
-                playersToRemove.clear();
 
                 boolean resetCapacity = false;
                 updateEdges(resetCapacity); //reset capacity and calculates new weight
@@ -141,9 +138,7 @@ public class Simulation {
 
     public void addSinglePlayer(Player player, ArrayList<FlowEdge> path, int t) {
         playersInGame.add(player);
-
         player.setTimeStarted(t);
-        playersToRemove.add(player);
 
         player.setPath(path);
         handleVariablesForMovement(player, player.getEdge());
@@ -192,15 +187,17 @@ public class Simulation {
     public void handleVariablesForMovement(Player player, FlowEdge nextEdge) {
         player.setPosition(nextEdge);
 
+        if(!player.isInQueue()) {
+            nextEdge.getQueue().add(player); //if no space is available, the player waits in a queue
+            player.setRemainingTimeForEdge(-1);
+        }
+
         //checks if there's any room available for the player to join the edge
         if (nextEdge.isOpen() && player.canLeaveQueue()) {
             nextEdge.getPlayersInEdge().add(player);
             nextEdge.getQueue().remove(player);
             nextEdge.decrementCapacity();
             player.setRemainingTimeForEdge(nextEdge.getActualWeight());
-        } else if(!player.isInQueue()) {
-            nextEdge.getQueue().add(player); //if no space is available, the player waits in a queue
-            player.setRemainingTimeForEdge(-1);
         }
     }
 

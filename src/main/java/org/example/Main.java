@@ -8,13 +8,13 @@ import java.io.IOException;
 // visualization add-ons
 public class Main {
     public static void main(String[] args) throws IOException {
-        boolean visualize = true;
-        boolean simpleDebug = true;
+        boolean visualize = false;
+        boolean simpleDebug = false;
         int numberOfPlayers = 1000;
         int numberOfEpochs = 100000;
         double chanceOfPlayerEntering = 0.0; //After the max flow number of players enter, each individual player has this value's chance to enter as well
-        int minExtraPlayers = 0;
-        int maxExtraPlayers = 20;
+        int minExtraPlayers = 100;
+        int maxExtraPlayers = 100;
 //        double total_POA = 0;
 //        double total_POA_improved = 0;
 //        for (int i = 0; i < 100; i++) {
@@ -33,13 +33,13 @@ public class Main {
 //        System.out.println("Price of Anarchy: " + avgPOA);
 //        System.out.println("Price of Anarchy: " + avgPOA_improved);
 
-        Simulation simulation = new Simulation("Vertices4.csv", "Edges4.csv");
-        Simulation simulation_improved = new Simulation("Vertices4.csv", "Edges4_improved.csv");
+        int graphNumber = 4;
+        Simulation simulation = new Simulation("Vertices" + graphNumber + ".csv", "Edges" + graphNumber + ".csv");
+        Simulation simulation_improved = new Simulation("Vertices" + graphNumber + ".csv", "Edges" + graphNumber + "_improved.csv");
 
         double PoA = simulation.simulate(numberOfPlayers, numberOfEpochs, minExtraPlayers, maxExtraPlayers, visualize, simpleDebug);
         double PoA_improved = simulation_improved.simulate(numberOfPlayers, numberOfEpochs, minExtraPlayers, maxExtraPlayers, visualize, simpleDebug);
         System.out.println("Price of Anarchy: " + PoA);
-        System.out.println("Improved Price of Anarchy: " + PoA_improved);
-
+        System.out.println("Bounded Price of Anarchy: " + PoA_improved);
     }
 }

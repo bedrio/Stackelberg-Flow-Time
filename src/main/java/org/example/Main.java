@@ -13,8 +13,7 @@ public class Main {
         int numberOfPlayers = 1000;
         int numberOfEpochs = 100000;
         double chanceOfPlayerEntering = 0.0; //After the max flow number of players enter, each individual player has this value's chance to enter as well
-        int minExtraPlayers = 100;
-        int maxExtraPlayers = 100;
+        int extraPlayers = 100;
 //        double total_POA = 0;
 //        double total_POA_improved = 0;
 //        for (int i = 0; i < 100; i++) {
@@ -37,8 +36,8 @@ public class Main {
         Simulation simulation = new Simulation("Vertices" + graphNumber + ".csv", "Edges" + graphNumber + ".csv");
         Simulation simulation_improved = new Simulation("Vertices" + graphNumber + ".csv", "Edges" + graphNumber + "_improved.csv");
 
-        double PoA = simulation.simulate(numberOfPlayers, numberOfEpochs, minExtraPlayers, maxExtraPlayers, visualize, simpleDebug);
-        double PoA_improved = simulation_improved.simulate(numberOfPlayers, numberOfEpochs, minExtraPlayers, maxExtraPlayers, visualize, simpleDebug);
+        double PoA = simulation.simulate(numberOfPlayers, numberOfEpochs, extraPlayers, visualize, simpleDebug);
+        double PoA_improved = simulation_improved.simulate(numberOfPlayers, numberOfEpochs, extraPlayers, visualize, simpleDebug);
         System.out.println("Price of Anarchy: " + PoA);
         System.out.println("Bounded Price of Anarchy: " + PoA_improved);
     }

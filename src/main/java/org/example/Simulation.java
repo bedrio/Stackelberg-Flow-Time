@@ -33,7 +33,7 @@ public class Simulation {
         this.playersDone = new ArrayList<>(); //players that finished the game
     }
 
-    public double simulate(int numberOfPlayers, int numberOfEpochs, int minExtraPlayers, int maxExtraPlayers, boolean visualize, boolean simpleDebug) throws IOException {
+    public double simulate(int numberOfPlayers, int numberOfEpochs, int extraPlayers, boolean visualize, boolean simpleDebug) throws IOException {
         if(visualize) {
             builder.visualize();
         }
@@ -55,10 +55,6 @@ public class Simulation {
                 movePlayers(t);
                 updateEdges(resetCapacity);
             }
-
-            int extraPlayers = new Random().nextInt(maxExtraPlayers + 1);
-
-
 
             for(int i=0; i < (maxFlow + extraPlayers); i++) {
                 if(playersBacklog.isEmpty()) {

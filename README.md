@@ -1,5 +1,5 @@
 # Stackelberg-Flow-Time
-An implementation of the paper "Stackelberg strategy for routing flow over time" in Python
+An implementation of the paper "Stackelberg strategy for routing flow over time" in Python. **All 3 group members contributed to this project implementation, and the commit history does not refelct which player programmed a section.** Since not everyone was well-versed with Git, Beder Rifai, handled version control
 
 ## How to Run
 To run this project in the correct environment, download the latest Java JDK and the latest Maven version. Here is a guide on how to download and setup [Maven](https://phoenixnap.com/kb/install-maven-windows). **It's imperative to have the correct environment or the program will not run.**

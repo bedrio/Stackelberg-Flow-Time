@@ -1,0 +1,5 @@
+Source,Target,Delay,Capacity
+Start,A,5,5
+Start,B,1,10
+A,End,1,5
+B,End,5,10

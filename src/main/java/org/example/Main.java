@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        boolean visualize = false;
+        boolean visualize = true;
         boolean simpleDebug = false;
         int numberOfPlayers = 500;
         int numberOfEpochs = 100000;

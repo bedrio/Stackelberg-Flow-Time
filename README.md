@@ -1,5 +1,5 @@
 # Stackelberg-Flow-Time
-An implementation of the paper "Stackelberg strategy for routing flow over time" in Python.
+An implementation of the paper "Stackelberg strategy for routing flow over time" in Java. The JGraphT library was used for graph structure and algorithms.
 
 ## How to Run
 To run this project in the correct environment, download the latest Java JDK and the latest Maven version. Here is a guide on how to download and setup [Maven](https://phoenixnap.com/kb/install-maven-windows). **It's imperative to have the correct environment or the program will not run.**
